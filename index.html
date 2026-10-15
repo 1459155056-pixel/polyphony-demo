@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>复调音乐的诞生 · 互动课堂</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>𝄞</text></svg>">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap">
+<style>
+  :root{
+    --paper:#f4ecd8;
+    --paper-dark:#e8dcc0;
+    --ink:#2c2416;
+    --ink-soft:#5a4d36;
+    --line:#c9b990;
+    --voiceA:#8b3a3a;   /* 圣咏/低音声部 */
+    --voiceB:#2c5f6f;   /* 叠加声部 */
+    --gold:#a87b1f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Noto Serif SC","Songti SC","SimSun",serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* 纸张纹理 */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(139,58,58,.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(44,95,111,.04) 0%, transparent 50%);
+    mix-blend-mode:multiply;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+  /* ===== 顶部 ===== */
+  header{
+    padding:56px 0 36px;text-align:center;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .eyebrow{
+    font-size:13px;letter-spacing:.3em;color:var(--ink-soft);
+    text-transform:uppercase;margin-bottom:16px;
+  }
+  h1{
+    font-size:clamp(32px,5vw,52px);font-weight:900;
+    letter-spacing:.05em;line-height:1.2;margin-bottom:16px;
+  }
+  .subtitle{font-size:17px;color:var(--ink-soft);max-width:640px;margin:0 auto}
+  .staff-deco{
+    display:flex;justify-content:center;gap:2px;margin-top:24px;opacity:.5;
+  }
+  .staff-deco span{width:2px;height:22px;background:var(--ink-soft)}
+  .staff-deco span:nth-child(odd){height:14px}
+
+  /* ===== 章节标题 ===== */
+  section{margin-bottom:64px}
+  .sec-label{
+    display:inline-block;font-size:13px;letter-spacing:.25em;
+    color:var(--gold);margin-bottom:10px;font-weight:600;
+  }
+  h2{
+    font-size:clamp(24px,3vw,32px);font-weight:700;
+    margin-bottom:8px;letter-spacing:.03em;
+  }
+  .sec-intro{color:var(--ink-soft);max-width:680px;margin-bottom:28px;font-size:15.5px}
+
+  /* ===== 通用卡片 ===== */
+  .lab{
+    background:#fbf7ea;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:32px;
+    box-shadow:0 1px 3px rgba(60,40,10,.06);
+  }
+
+  /* ===== 声部开关按钮 ===== */
+  .voice-toggles{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0;
+  }
+  .voice-btn{
+    display:flex;align-items:center;gap:14px;
+    padding:16px 18px;border:2px solid var(--line);
+    background:#fff;border-radius:6px;cursor:pointer;
+    font-family:inherit;text-align:left;transition:all .2s;
+    min-height:64px;
+  }
+  .voice-btn:hover{border-color:var(--ink-soft)}
+  .voice-btn.active{border-width:2px}
+  .voice-btn .dot{
+    width:14px;height:14px;border-radius:50%;flex-shrink:0;
+    background:#ccc;transition:background .2s;
+  }
+  .voice-btn.voice-a.active{border-color:var(--voiceA);background:#fdf3f3}
+  .voice-btn.voice-a.active .dot{background:var(--voiceA);box-shadow:0 0 0 4px rgba(139,58,58,.15)}
+  .voice-btn.voice-b.active{border-color:var(--voiceB);background:#f0f6f7}
+  .voice-btn.voice-b.active .dot{background:var(--voiceB);box-shadow:0 0 0 4px rgba(44,95,111,.15)}
+  .voice-btn .vname{font-weight:700;font-size:15px}
+  .voice-btn .vdesc{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+
+  /* ===== 播放控制 ===== */
+  .controls{
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;
+  }
+  .btn{
+    font-family:inherit;font-size:15px;font-weight:600;
+    padding:12px 28px;border-radius:4px;cursor:pointer;
+    border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);
+    transition:all .15s;letter-spacing:.05em;
+  }
+  .btn:hover{background:#000}
+  .btn.secondary{
+    background:transparent;color:var(--ink);
+  }
+  .btn.secondary:hover{background:var(--ink);color:var(--paper)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .mode-group{
+    display:flex;gap:0;border:1.5px solid var(--line);border-radius:4px;overflow:hidden;
+  }
+  .mode-group button{
+    font-family:inherit;padding:10px 16px;background:#fff;border:none;
+    cursor:pointer;font-size:14px;color:var(--ink-soft);border-right:1px solid var(--line);
+  }
+  .mode-group button:last-child{border-right:none}
+  .mode-group button.on{background:var(--ink);color:var(--paper)}
+
+  /* ===== Canvas 区域 ===== */
+  .stage{
+    background:#fffef9;border:1px solid var(--line);border-radius:4px;
+    margin-top:24px;position:relative;overflow:hidden;
+  }
+  canvas{display:block;width:100%;height:auto}
+  .stage-label{
+    position:absolute;top:12px;left:16px;font-size:12px;color:var(--ink-soft);
+    letter-spacing:.1em;pointer-events:none;
+  }
+
+  /* ===== 提示条 ===== */
+  .hint{
+    margin-top:18px;padding:14px 18px;
+    background:var(--paper-dark);border-left:3px solid var(--gold);
+    font-size:14px;color:var(--ink-soft);border-radius:0 4px 4px 0;
+  }
+  .hint strong{color:var(--ink)}
+
+  /* ===== 历史时间线 ===== */
+  .timeline{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    margin-top:24px;border:1px solid var(--line);border-radius:6px;overflow:hidden;
+    background:#fbf7ea;
+  }
+  .tl-item{
+    padding:20px;border-right:1px solid var(--line);
+    position:relative;
+  }
+  .tl-item:last-child{border-right:none}
+  .tl-era{font-size:12px;color:var(--gold);letter-spacing:.15em;font-weight:600;margin-bottom:6px}
+  .tl-name{font-size:16px;font-weight:700;margin-bottom:6px}
+  .tl-desc{font-size:13px;color:var(--ink-soft);line-height:1.6}
+
+  /* ===== 对比表格 ===== */
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;
+  }
+  .compare-card{
+    padding:22px;border-radius:6px;border:1px solid var(--line);background:#fff;
+  }
+  .compare-card h4{font-size:16px;margin-bottom:10px;letter-spacing:.05em}
+  .compare-card.poly h4{color:var(--voiceB)}
+  .compare-card.homo h4{color:var(--voiceA)}
+  .compare-card p{font-size:14px;color:var(--ink-soft);line-height:1.7}
+  .compare-card ul{margin-top:8px;padding-left:18px;font-size:14px;color:var(--ink-soft)}
+  .compare-card li{margin-bottom:4px}
+
+  /* ===== 底部 ===== */
+  footer{
+    text-align:center;padding:32px 0 48px;
+    border-top:1px solid var(--line);margin-top:40px;
+    color:var(--ink-soft);font-size:13px;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width:720px){
+    .voice-toggles{grid-template-columns:1fr}
+    .timeline{grid-template-columns:1fr 1fr}
+    .tl-item{border-right:none;border-bottom:1px solid var(--line)}
+    .compare{grid-template-columns:1fr}
+    .lab{padding:20px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">音乐鉴赏 · 课堂互动</div>
+    <h1>复调音乐的诞生</h1>
+    <p class="subtitle">从一条孤独的旋律，到两条独立线条的对话。<br>戴上耳机，亲手"听见"复调是如何长出来的。</p>
+    <div class="staff-deco" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </header>
+
+  <!-- ===== 模块一：复调诞生实验室 ===== -->
+  <section>
+    <span class="sec-label">实验一</span>
+    <h2>复调是怎样一步步诞生的？</h2>
+    <p class="sec-intro">
+      上节课我们认识了最早的复调形式——奥尔加农。但早期的"第二条旋律"只是贴在圣咏下方走，
+      并不是真正独立的。下面请按顺序点亮声部，<strong>听清楚三条阶段的差别</strong>。
+    </p>
+
+    <div class="lab">
+      <div class="mode-group" role="tablist" aria-label="演进阶段">
+        <button data-stage="0" class="on">① 单声圣咏</button>
+        <button data-stage="1">② 平行奥尔加农</button>
+        <button data-stage="2">③ 反向进行</button>
+      </div>
+
+      <div class="voice-toggles">
+        <button class="voice-btn voice-a active" data-voice="0" aria-pressed="true">
+          <span class="dot"></span>
+          <span>
+            <div class="vname">声部 A · 格里高利圣咏</div>
+            <div class="vdesc">10世纪的素歌旋律，悠长、庄严</div>
+          </span>
+        </button>
+        <button class="voice-btn voice-b" data-voice="1" aria-pressed="false">
+          <span class="dot"></span>
+          <span>
+            <div class="vname">声部 B · 后来加入的第二声部</div>
+            <div class="vdesc">由僧侣们慢慢"加"上去的那条线</div>
+          </span>
+        </button>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="playLab">▶ 播放</button>
+        <button class="btn secondary" id="stopLab">■ 停止</button>
+        <span style="font-size:13px;color:var(--ink-soft);margin-left:8px">
+          提示：切换阶段后重新点播放
+        </span>
+      </div>
+
+      <div class="stage">
+        <div class="stage-label">旋律走向示意图</div>
+        <canvas id="labCanvas" width="1000" height="280"></canvas>
+      </div>
+
+      <div class="hint" id="labHint">
+        <strong>先听①：</strong>只有一条旋律线，像一个人在空教堂里吟唱。这就是复调出现之前的世界。
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    复调音乐互动课堂 · 适用于高中音乐鉴赏课 · 建议配合投影仪与音响使用
+  </footer>
+</div>
+
+<script>
+/* ===== 音频引擎：原生 Web Audio 合成钢琴音色 ===== */
+let ctx = null;
+let masterGain = null;
+let isPlaying = false;
+let activeTimers = [];
+
+function ensureCtx(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 0.35;
+    masterGain.connect(ctx.destination);
+  }
+  if(ctx.state === 'suspended') ctx.resume();
+}
+
+// 播放一个音符（暖音色：正弦+低通滤波，类似管风琴/古钢琴）
+function playNote(midi, time, dur, vol=1){
+  if(!ctx) return;
+  const freq = 440 * Math.pow(2, (midi - 69) / 12);
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 1800;
+  filter.Q.value = 0.5;
+  osc1.type = 'sine';
+  osc2.type = 'sine';
+  osc1.frequency.value = freq;
+  osc2.frequency.value = freq * 2.01;
+  const g2 = ctx.createGain();
+  g2.gain.value = 0.12;
+  gain.gain.setValueAtTime(0, time);
+  gain.gain.linearRampToValueAtTime(0.4*vol, time + 0.04);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc1.connect(gain);
+  osc2.connect(g2); g2.connect(gain);
+  gain.connect(filter);
+  filter.connect(masterGain);
+  osc1.start(time); osc2.start(time);
+  osc1.stop(time + dur + 0.1); osc2.stop(time + dur + 0.1);
+}
+
+function stopAll(){
+  activeTimers.forEach(t=>clearTimeout(t));
+  activeTimers = [];
+  isPlaying = false;
+  if(masterGain) masterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
+  setTimeout(()=>{ if(masterGain) masterGain.gain.value = 0.35; }, 150);
+}
+
+/* ===== 模块一：复调诞生实验室 =====
+ * 5 个音的短句，每音 1.6 秒
+ * 声部A（圣咏）：C4 D4 E4 D4 C4 = 60 62 64 62 60
+ */
+const LAB_A = [60, 62, 64, 62, 60];
+// 阶段②：平行四度下方 = G3 A3 B3 A3 G3 = 55 57 59 57 55
+const LAB_B_PARALLEL = [55, 57, 59, 57, 55];
+// 阶段③：反向进行 = E4 D4 C4 D4 E4 = 64 62 60 62 64
+const LAB_B_CONTRARY = [64, 62, 60, 62, 64];
+const LAB_NOTE_DUR = 1.6;
+
+let labStage = 0;       // 0=单声, 1=平行, 2=反向
+let labVoiceOn = [true, false];
+
+const labHintText = [
+  '<strong>先听①：</strong>只有一条旋律线，像一个人在空教堂里吟唱。这就是复调出现之前的世界。',
+  '<strong>再听②：</strong>第二条声部贴在圣咏下方走，和圣咏始终保持四度距离。它听起来更像"加厚的同一条旋律"，还不够独立。点一下"声部B"开关对比。',
+  '<strong>最后听③：</strong>注意！两条旋律开始朝相反方向走了——你上我下，你下我上。这就是真正的复调诞生的瞬间：两条线，各自有方向。'
+];
+
+document.querySelectorAll('.mode-group button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.mode-group button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    labStage = parseInt(btn.dataset.stage);
+    document.getElementById('labHint').innerHTML = labHintText[labStage];
+    // 阶段②③自动打开声部B，方便对比
+    if(labStage >= 1){
+      labVoiceOn[1] = true;
+      document.querySelector('[data-voice="1"]').classList.add('active');
+      document.querySelector('[data-voice="1"]').setAttribute('aria-pressed','true');
+    } else {
+      labVoiceOn[1] = false;
+      document.querySelector('[data-voice="1"]').classList.remove('active');
+      document.querySelector('[data-voice="1"]').setAttribute('aria-pressed','false');
+    }
+    drawLab();
+  });
+});
+
+document.querySelectorAll('[data-voice]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const idx = parseInt(btn.dataset.voice);
+    labVoiceOn[idx] = !labVoiceOn[idx];
+    btn.classList.toggle('active', labVoiceOn[idx]);
+    btn.setAttribute('aria-pressed', labVoiceOn[idx]);
+    drawLab();
+  });
+});
+
+document.getElementById('playLab').addEventListener('click', ()=>{
+  ensureCtx();
+  if(isPlaying) stopAll();
+  isPlaying = true;
+  const bLine = labStage === 0 ? [] : (labStage === 1 ? LAB_B_PARALLEL : LAB_B_CONTRARY);
+  const start = ctx.currentTime + 0.1;
+  for(let i=0;i<LAB_A.length;i++){
+    const t = start + i * LAB_NOTE_DUR;
+    if(labVoiceOn[0]) playNote(LAB_A[i], t, LAB_NOTE_DUR * 0.95, 1);
+    if(labVoiceOn[1] && bLine.length) playNote(bLine[i], t, LAB_NOTE_DUR * 0.95, 0.8);
+    // 进度可视化
+    const idx = i;
+    activeTimers.push(setTimeout(()=>drawLab(idx), i*LAB_NOTE_DUR*1000));
+  }
+  activeTimers.push(setTimeout(()=>{ isPlaying=false; drawLab(-1); }, LAB_A.length*LAB_NOTE_DUR*1000+200));
+});
+document.getElementById('stopLab').addEventListener('click', ()=>{ stopAll(); drawLab(-1); });
+
+/* 实验室 canvas */
+const labCv = document.getElementById('labCanvas');
+const labCtx = labCv.getContext('2d');
+function drawLab(activeIdx=-1){
+  const W = labCv.width, H = labCv.height;
+  labCtx.clearRect(0,0,W,H);
+  // 网格线
+  labCtx.strokeStyle = '#e8dcc0'; labCtx.lineWidth = 1;
+  for(let y=40;y<H-20;y+=40){
+    labCtx.beginPath(); labCtx.moveTo(40,y); labCtx.lineTo(W-40,y); labCtx.stroke();
+  }
+  const bLine = labStage === 0 ? [] : (labStage === 1 ? LAB_B_PARALLEL : LAB_B_CONTRARY);
+  const yOf = (midi) => H - 40 - (midi - 48) * 14;
+  const xOf = (i) => 80 + i * ((W-160)/(LAB_A.length-1));
+
+  // 画声部B
+  if(labVoiceOn[1] && bLine.length){
+    labCtx.strokeStyle = '#2c5f6f'; labCtx.lineWidth = 2.5;
+    labCtx.beginPath();
+    for(let i=0;i<bLine.length;i++){
+      const x=xOf(i), y=yOf(bLine[i]);
+      i===0?labCtx.moveTo(x,y):labCtx.lineTo(x,y);
+    }
+    labCtx.stroke();
+    for(let i=0;i<bLine.length;i++){
+      const x=xOf(i), y=yOf(bLine[i]);
+      labCtx.fillStyle = activeIdx===i ? '#2c5f6f' : '#fff';
+      labCtx.beginPath(); labCtx.arc(x,y,activeIdx===i?9:6,0,Math.PI*2); labCtx.fill();
+      labCtx.strokeStyle='#2c5f6f'; labCtx.lineWidth=2; labCtx.stroke();
+    }
+  }
+  // 画声部A
+  if(labVoiceOn[0]){
+    labCtx.strokeStyle = '#8b3a3a'; labCtx.lineWidth = 2.5;
+    labCtx.beginPath();
+    for(let i=0;i<LAB_A.length;i++){
+      const x=xOf(i), y=yOf(LAB_A[i]);
+      i===0?labCtx.moveTo(x,y):labCtx.lineTo(x,y);
+    }
+    labCtx.stroke();
+    for(let i=0;i<LAB_A.length;i++){
+      const x=xOf(i), y=yOf(LAB_A[i]);
+      labCtx.fillStyle = activeIdx===i ? '#8b3a3a' : '#fff';
+      labCtx.beginPath(); labCtx.arc(x,y,activeIdx===i?9:6,0,Math.PI*2); labCtx.fill();
+      labCtx.strokeStyle='#8b3a3a'; labCtx.lineWidth=2; labCtx.stroke();
+    }
+  }
+  // 标签
+  labCtx.font='13px "Noto Serif SC",serif';
+  labCtx.fillStyle='#8b3a3a'; labCtx.fillText('圣咏', 10, yOf(LAB_A[0])-10);
+  if(labVoiceOn[1] && bLine.length){
+    labCtx.fillStyle='#2c5f6f'; labCtx.fillText('第二声部', 10, yOf(bLine[0])-10);
+  }
+}
+drawLab();
+</script>
+</body>
+</html>
